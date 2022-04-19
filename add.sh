@@ -1,0 +1,24 @@
+#!/bin/bash
+
+read -p "Enter WordPress version (5.9-php8.0-apache) or latest: " WORDPRESS_VERSION
+[ -z "$WORDPRESS_VERSION" ] && WORDPRESS_VERSION=5.9-php8.0-apache
+echo $WORDPRESS_VERSION;
+
+read -p "Enter project name (wp7410): " COMPOSE_PROJECT_NAME
+[ -z "$COMPOSE_PROJECT_NAME" ] && COMPOSE_PROJECT_NAME=wp7410
+echo $COMPOSE_PROJECT_NAME;
+
+read -p "Enter wp site port (7410): " WORDPRESS_SITE_PORT
+[ -z "$WORDPRESS_SITE_PORT" ] && WORDPRESS_SITE_PORT=7410
+echo $WORDPRESS_SITE_PORT;
+
+WORDPRESS_DATA_DIR="./volumes/$COMPOSE_PROJECT_NAME"
+echo $WORDPRESS_DATA_DIR
+
+DATABASE_PASSWORD="EP$COMPOSE_PROJECT_NAME"
+echo $DATABASE_PASSWORD
+
+MYSQL_DATA_DIR="./volumes/db_$COMPOSE_PROJECT_NAME"
+echo $MYSQL_DATA_DIR
+
+docker-compose up -d --build

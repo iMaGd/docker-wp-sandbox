@@ -28,3 +28,7 @@ or for custom project names:
 `COMPOSE_PROJECT_NAME=wp8010 && docker-compose down`
 
 ---
+
+### Add new site
+
+`sh add.sh`
