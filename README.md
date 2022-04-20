@@ -5,7 +5,7 @@ Create a fresh WordPress installtion with one simple command
 
 Clone the repo on your machine
 ```
-git clone https://github.com/M4Gd/docker-wp-sandbox.git sancbox
+git clone https://github.com/M4Gd/docker-wp-sandbox.git sandbox
 cd sandbox
 ```
 Then start the containers
