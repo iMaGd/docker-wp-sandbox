@@ -15,7 +15,7 @@ services:
 #    image: wordpress:5.9-php8.1-apache
 #    image: wordpress:beta-5-php7.4-apache
 #    image: wordpress:beta-5-php8.1-apache
-    container_name: ${COMPOSE_PROJECT_NAME:-wordpress}
+    container_name: ${COMPOSE_PROJECT_NAME:-wordpress}-wp
     volumes:
       - ./.docker/server/php.ini:/usr/local/etc/php/conf.d/php.ini
       - ${WORDPRESS_DATA_DIR:-./volumes/wordpress}:/var/www/html
@@ -34,7 +34,7 @@ services:
 
   mysql:
     image: mariadb:${MARIADB_VERSION:-latest}
-    container_name: ${COMPOSE_PROJECT_NAME}_mysql
+    container_name: ${COMPOSE_PROJECT_NAME}-db
     volumes:
       - ${MYSQL_DATA_DIR:-./volumes/mysql}:/var/lib/mysql
     environment:
