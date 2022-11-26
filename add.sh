@@ -1,7 +1,7 @@
 #!/bin/bash
 
-read -p "Enter WordPress version (5.9-php8.0-apache) or latest: " WORDPRESS_VERSION
-[ -z "$WORDPRESS_VERSION" ] && WORDPRESS_VERSION=5.9-php8.0-apache
+read -p "Enter WordPress version (6-php8.0-apache) or latest: " WORDPRESS_VERSION
+[ -z "$WORDPRESS_VERSION" ] && WORDPRESS_VERSION=6-php8.0-apache
 echo $WORDPRESS_VERSION;
 export WORDPRESS_VERSION=$WORDPRESS_VERSION;
 
@@ -22,5 +22,7 @@ export WORDPRESS_DATA_DIR="./volumes/$COMPOSE_PROJECT_NAME/wp"
 export DATABASE_PASSWORD="EP$COMPOSE_PROJECT_NAME"
 export MYSQL_DATA_DIR="./volumes/$COMPOSE_PROJECT_NAME/db"
 export PLUGINS_DATA_DIR="./volumes/$COMPOSE_PROJECT_NAME/plugins"
+
+export PMA_PORT="1$WORDPRESS_SITE_PORT"
 
 docker-compose up -d --build
