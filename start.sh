@@ -144,100 +144,60 @@ if [[ "$AUTO_INSTALL" == true ]]; then
     docker compose exec wordpress wp core install --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --title="WP PHP $PHP_VERSION" --admin_user="$WP_USER" --admin_password="$WP_PASS" --admin_email="$WP_EMAIL" --allow-root
 fi
 
-function process_wp_plugins() {
-    local WP_PLUGINS=$1
-    local -a PLUGIN_ARRAY REMOVALS INSTALLS
-
-    # Split the plugins, trim spaces, and convert to an array
-    IFS=',' read -r -a PLUGIN_ARRAY <<<"$WP_PLUGINS"
-    for i in "${!PLUGIN_ARRAY[@]}"; do
-        PLUGIN_ARRAY[$i]=$(echo "${PLUGIN_ARRAY[$i]}" | xargs)
-    done
-
-    # Categorize plugins into removals and installs
-    for PLUGIN in "${PLUGIN_ARRAY[@]}"; do
-        if [[ $PLUGIN == -* ]]; then
-            REMOVALS+=("${PLUGIN:1}")
-        elif [[ $PLUGIN == +* ]]; then
-            INSTALLS+=("${PLUGIN:1}")
-        else
-            INSTALLS+=("$PLUGIN")
-        fi
-    done
-
-    if [ -n "$REMOVALS" ]; then
-        echo "\nRemoving redundant plugins:\n"
-        for PLUGIN in "${REMOVALS[@]}"; do
-            docker compose exec wordpress wp plugin delete "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
-        done
-    fi
-
-    if [ -n "$INSTALLS" ]; then
-        echo "\nInstalling plugins:\n"
-        for PLUGIN in "${INSTALLS[@]}"; do
-            docker compose exec wordpress wp plugin install "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
-            docker compose exec wordpress wp plugin activate "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
-        done
-    fi
-
-    #docker compose exec wordpress wp eval '$user = wp_signon(["user_login" => "admin","user_password" => "admin","remember" => true], false);' --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
-}
-
 
 process_wp_plugins() {
     local WP_PLUGINS=$1
-
-    # Remove extra spaces and split into an array
-    local PLUGIN_ARRAY=($(echo $WP_PLUGINS | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'))
-
-    # Initialize the REMOVALS and INSTALLS arrays
+    local PLUGIN_ARRAY
     local REMOVALS=()
     local INSTALLS=()
-    local REMOVALS_VERSIONS=()
-    local INSTALLS_VERSIONS=()
+    local VERSIONS=()
+
+    # Remove extra spaces and split into an array
+    PLUGIN_ARRAY=($(echo $WP_PLUGINS | tr ',' '\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'))
 
     # Process each plugin and add it to the correct list
     for PLUGIN in "${PLUGIN_ARRAY[@]}"; do
-        # Check if the plugin has a version specifier
-        if [[ $PLUGIN == *@* ]]; then
-            # Split the plugin and version
-            IFS='@' read -r NAME VERSION <<< "$PLUGIN"
-            NAME=${NAME#[-+]}  # Remove the '+' or '-' prefix from name
-        else
-            NAME=${PLUGIN#[-+]}  # Remove the '+' or '-' prefix from name
-            VERSION=""  # No version specifier
-        fi
-
         if [[ $PLUGIN == -* ]]; then
-            # Add to REMOVALS without any prefix
-            REMOVALS+=("$NAME")
-            REMOVALS_VERSIONS+=("$VERSION")
+            # Remove the '-' prefix and add to REMOVALS
+            REMOVALS+=("${PLUGIN:1}")
         else
-            # Add to INSTALLS without any prefix
-            INSTALLS+=("$NAME")
-            INSTALLS_VERSIONS+=("$VERSION")
+            VERSION=""
+            # Extract version if exists
+            if [[ $PLUGIN == *@* ]]; then
+                VERSION="${PLUGIN##*@}"
+                PLUGIN="${PLUGIN%@*}"
+            fi
+
+            # Remove the '+' prefix if it exists
+            if [[ $PLUGIN == +* ]]; then
+                PLUGIN="${PLUGIN:1}"
+            fi
+
+            # Add PLUGIN to INSTALLS and VERSION to VERSIONS
+            INSTALLS+=("$PLUGIN")
+            VERSIONS+=("$VERSION")
         fi
     done
 
-    # Print out the REMOVALS and their versions
-    echo "\nPlugins to remove:\n"
-    for i in "${!REMOVALS[@]}"; do
-        PLUGIN=${REMOVALS[$i]}
+    # Print out the REMOVALS
+    echo "Plugins to remove:"
+    for PLUGIN in "${REMOVALS[@]}"; do
         docker compose exec wordpress wp plugin delete "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
     done
 
     # Print out the INSTALLS and their versions
-    echo "\nPlugins to install:\n"
-    for i in "${!INSTALLS[@]}"; do
-        PLUGIN=${INSTALLS[$i]}
-        VERSION=${INSTALLS_VERSIONS[$i]}
-        if [[ ! -z $VERSION ]]; then
-            docker compose exec wordpress wp plugin install "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --version="$VERSION" --allow-root
-            docker compose exec wordpress wp plugin activate "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --version="$VERSION" --allow-root
+    echo "Plugins with optional versions to install:"
+    local INDEX=0
+    for PLUGIN in "${INSTALLS[@]}"; do
+
+        if [ -n "${VERSIONS[$INDEX]}" ]; then
+            echo "Installing ${PLUGIN} (version: ${VERSIONS[$INDEX]})"
+            docker compose exec wordpress wp plugin install "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --version="${VERSIONS[$INDEX]}" --allow-root
         else
-            docker compose exec wordpress wp plugin install "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root --version="stable"
-            docker compose exec wordpress wp plugin activate "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root --version="stable"
+            docker compose exec wordpress wp plugin install "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
         fi
+        docker compose exec wordpress wp plugin activate "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
+        ((INDEX++))
     done
 }
 
