@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 
 # Default values
 WORDPRESS_SITE_PORT=8081
@@ -111,7 +112,7 @@ fi
 
 # If FRESH_INSTALL was enabled
 if [[ "$CLEAN_INSTALL" == true ]]; then
-    echo "\nCleaning volumes .. \n"
+    printf "\nCleaning volumes .. \n"
     rm -rf "./.docker/.stage/volumes/$WORDPRESS_SITE_PORT"
 fi
 
@@ -123,7 +124,7 @@ else
     docker compose --env-file .docker/.env -f .docker/docker-compose.yml -f .docker/docker-compose-volume.yml up -d --remove-orphans
 fi
 
-echo "\nWaiting for database container to get ready..."
+printf "\nWaiting for database container to get ready..."
     while ! docker compose exec db mysqladmin --user=root --password=root --host "127.0.0.1" ping --silent &> /dev/null ; do
     sleep 1
 done
@@ -140,7 +141,7 @@ fi
 # If auto install is enabled
 if [[ "$AUTO_INSTALL" == true ]]; then
     # Install WordPress using WP-CLI
-    echo "\nInstalling WordPress .."
+    printf "\nInstalling WordPress .."
     docker compose exec wordpress wp core install --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --title="WP PHP $PHP_VERSION" --admin_user="$WP_USER" --admin_password="$WP_PASS" --admin_email="$WP_EMAIL" --allow-root
 fi
 
@@ -210,8 +211,8 @@ if [ -n "$WP_PLUGINS" ] && [[ "$AUTO_INSTALL" == true ]]; then
     process_wp_plugins "$WP_PLUGINS"
 fi
 
-echo "\nSetup completed."
-echo "\nWordPress site: $URL"
+printf "\nSetup completed."
+printf "\nWordPress site: $URL"
 echo "PhpMyAdmin: http://127.0.0.1:${PMA_PORT}"
 
 

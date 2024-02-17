@@ -48,5 +48,5 @@ docker compose --env-file .docker/.env -f .docker/docker-compose.yml down
 # If CLEAN_INSTALL was enabled
 if [[ "$CLEAN_INSTALL" == true ]]; then
     rm -rf "./.docker/.stage/volumes/$WORDPRESS_SITE_PORT"
-    echo "\nALL volumes for this site are removed. \n"
+    printf "\nALL volumes for this site are removed. \n"
 fi
