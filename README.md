@@ -1,34 +1,134 @@
-# docker-wp-sandbox
-Create a fresh WordPress installtion with one simple command
+## Local WordPress Docker Environment Generator
 
-### Quick start
+This repository helps you to easily set up a local WordPress environment using Docker including easy configuration of WordPress, PHPMyAdmin, and the option to install/uninstall plugins automatically. Also makes you able to generate a complete WordPress setup with any WordPress or PHP version of your choice. This guide will walk you through the process of cloning this repository, setting it up, and customizing it to fit your needs.
 
-Clone the repo on your machine
+## Prerequisites
+
+Before beginning, make sure you have Docker installed on your local machine. You can download Docker from the [official website](https://www.docker.com/products/docker-desktop).
+
+## Getting Started
+
+1. **Clone the Repository**
+
+   First, clone this repository to your local machine:
+
+   ```sh
+   git clone https://github.com/iMaGd/docker-wp-sandbox.git
+   cd docker-wp-sandbox
+
+   # Grant execution permission to script files
+   sudo chmod +x start.sh stop.sh
+   ```
+
+3. **Start the Environment**
+
+   By running `start.sh` in following command, it will create a WordPress environment with PHP 8.1, installs WordPress core, removes the "hello" plugin, installs the "depicter" plugin at version 2.1.0, and then open the site in your browser on port 8081.
+
+   ```sh
+   ./start.sh -p 8081 --php 8.1 -b --auto-install --wp-plugins "-hello,+depicter@2.1.0" -o
+   ```
+
+   This script comes with various options to customize your WordPress setup:
+
+   - `-p, --port` Set the local port for the WP site.
+   - `-v, --volume` Set a local volume.
+   - `-w, --wp-image` Set the WordPress Docker Image Tag.
+   - `--php` Set the PHP version.
+   - `-b, --rebuild` Trigger a rebuild of the Docker environment.
+   - `-c, --clean` Mark for a fresh install (removes existing volumes).
+   - `-o, --auto-open` Open the site in browser when the site is ready.
+   - `--auto-install` Install WP core and plugins.
+   - `--wp-cli` Install WP-CLI inside the container.
+   - `--wp-plugins` Set the list of WP plugins slugs, separated by commas.
+   - `--wp-user` Set the WordPress admin username.
+   - `--wp-pass` Set the WordPress admin password.
+   - `--wp-email` Set the WordPress admin email.
+
+
+## Overview of the `start.sh` Script
+
+The `start.sh` script is the heart of this setup, offering a variety of options to customize your WordPress Docker environment. Here's an explanation of each available option:
+
+### `-p, --port`
+
+The local port on which the WordPress site will be available. Example: `-p 8082` would make your WordPress site accessible at `http://localhost:8082`.
+
+### `--php`
+
+Defines the PHP version for your WordPress Docker container. Example: `--php 7.4` will setup a WordPress environment with PHP 7.4.
+
+### `-v, --volume`
+
+Mounts a local volume to the Docker container. This is particularly useful for plugin or theme development. For example, `-v "./my-plugin/:/var/www/html/wp-content/plugins/my-plugin"` mounts a local directory to the plugins directory of WordPress.
+
+### `-w, --wp-image`
+
+Specifies the WordPress Docker image tag. This is used if you want to specify a particular WordPress version. For instance, `-w 5.7.2-php7.4-apache` sets up WordPress version 5.7.2 with PHP 7.4.
+
+### `-b, --rebuild`
+
+Rebuilds the Docker containers if they already exist. This is useful when you've made configuration changes and need to apply them.
+
+### `-c, --clean`
+
+Indicates a clean installation by wiping the existing Docker volumes associated with the selected port before setting it up again.
+
+### `-o, --auto-open`
+
+Automatically opens the WordPress setup in your default browser when ready.
+
+### `--auto-install`
+
+Automatically installs WordPress after spinning up the Docker containers, using the details provided for admin username, password, and email.
+
+### `--wp-cli`
+
+Installs WP-CLI within the WordPress Docker container. This is useful for running WordPress commands directly in the Docker environment.
+
+### `--wp-plugins`
+
+Specifies plugins to install or uninstall. Prepend the plugin slug with `+` to install, `-` to uninstall. You can also specify a version for installing by appending `@<version>` to the slug. For example, `--wp-plugins "-hello,+depicter@2.1.0"` would uninstall the "hello" plugin and install "depicter" at version 2.1.0.
+
+### `--wp-user`, `--wp-pass`, `--wp-email`
+
+Sets the WordPress admin username, password, and email address respectively. These are needed primarily for the `--auto-install` option.
+
+## Usage Examples
+
+### Starting a New WordPress Site
+
+To start a fresh WordPress site on port 8074 with PHP version 7.4:
+
+```bash
+sh start.sh -p 8074 --php 7.4 -b --clean
 ```
-git clone https://github.com/M4Gd/docker-wp-sandbox.git sandbox
-cd sandbox
-```
-Then start the containers
-```
-docker-compose up -d --build
-```
 
-or for more customization run:
+### Automatically Opening Site In Browser
 
-```
-WORDPRESS_VERSION=5.9-php8.0-apache && COMPOSE_PROJECT_NAME=wp8010 && WORDPRESS_SITE_PORT=8010 && WORDPRESS_DATA_DIR=./volumes/wp8010 && DATABASE_PASSWORD=EPwp8010 && MYSQL_DATA_DIR=./volumes/db8010 && docker-compose up -d --build
+To automatically open the WordPress installation after setup in your browser, add the `-o` flag:
+
+```bash
+sh start.sh -p 8074 --php 7.4 -b --clean -o
 ```
 
-### Stop
+### Setting Up Plugins On Installation
 
-`docker-compose down`
+To setup WordPress with specific plugins installed or removed by default:
 
-or for custom project names:
+```bash
+sh start.sh -p 8080 --php 8.0 --auto-install --wp-plugins "+woocommerce,+classic-editor,-hello" -o
+```
 
-`COMPOSE_PROJECT_NAME=wp8010 && docker-compose down`
+## Stopping the WordPress Site
 
----
+To stop the WordPress site and optionally clean up all associated Docker volumes for a specific port, you can use the `stop.sh` script. For example, to stop the site running on port 8082 and remove its volumes:
 
-### Add new site
+```bash
+sh stop.sh -p 8082 -c
+```
 
-`sh add.sh`
+## Additional Notes
+
+This guide assumes familiarity with basic Docker and WordPress concepts. Make sure Docker is running on your system before executing any scripts. The flexibility of this tool means you can tailor your WordPress environment to match development needs closely, from testing plugins and themes to experimenting with different versions of WordPress and PHP.
+
+If you encounter any issues or have further questions, feel free to open an issue in this repository.
