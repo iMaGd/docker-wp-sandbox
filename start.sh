@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # Default values
 WORDPRESS_SITE_PORT=8081
 #LOCAL_VOLUME="./my-plugin/:/var/www/html/wp-content/plugins/my-plugin"
@@ -97,23 +95,27 @@ export LOCAL_VOLUME;
 
 echo "Preparing to containerized WP installation on port $WORDPRESS_SITE_PORT with $WORDPRESS_IMAGE";
 
-echo "local volume is $LOCAL_VOLUME"
 
 # If REBUILD or FRESH_INSTALL was enabled
 if [[ "$REBUILD" == true ]] || [[ "$CLEAN_INSTALL" == true ]]; then
-    printf "\nStopping containers .. \n"
+    echo ""
+    echo "Stopping containers .."
+    echo ""
+
     # call the override docker compose file if $LOCAL_VOLUME is set
     if [ -z "$LOCAL_VOLUME" ]; then
         docker compose --env-file .docker/.env -f .docker/docker-compose.yml down
     else
+        echo "local volume is $LOCAL_VOLUME"
         docker compose --env-file .docker/.env -f .docker/docker-compose.yml -f .docker/docker-compose-volume.yml down
     fi
 fi
 
 # If FRESH_INSTALL was enabled
 if [[ "$CLEAN_INSTALL" == true ]]; then
-    printf "\nCleaning volumes .. \n"
+    echo ""
     rm -rf "./.docker/.stage/volumes/$WORDPRESS_SITE_PORT"
+    echo "Volume cleaned."
 fi
 
 
@@ -124,8 +126,9 @@ else
     docker compose --env-file .docker/.env -f .docker/docker-compose.yml -f .docker/docker-compose-volume.yml up -d --remove-orphans
 fi
 
-printf "\nWaiting for database container to get ready..."
-    while ! docker compose exec db mysqladmin --user=root --password=root --host "127.0.0.1" ping --silent &> /dev/null ; do
+echo ""
+echo "Waiting for database container to get ready..."
+while ! docker compose exec db mysqladmin --user=root --password=root --host "127.0.0.1" ping --silent &> /dev/null ; do
     sleep 1
 done
 
@@ -141,7 +144,8 @@ fi
 # If auto install is enabled
 if [[ "$AUTO_INSTALL" == true ]]; then
     # Install WordPress using WP-CLI
-    printf "\nInstalling WordPress .."
+    echo ""
+    echo "Installing WordPress .."
     docker compose exec wordpress wp core install --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --title="WP PHP $PHP_VERSION" --admin_user="$WP_USER" --admin_password="$WP_PASS" --admin_email="$WP_EMAIL" --allow-root
 fi
 
@@ -181,13 +185,14 @@ process_wp_plugins() {
     done
 
     # Print out the REMOVALS
-    echo "Plugins to remove:"
+    echo "Removing redundant plugins:"
     for PLUGIN in "${REMOVALS[@]}"; do
         docker compose exec wordpress wp plugin delete "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
     done
 
     # Print out the INSTALLS and their versions
     echo "Plugins with optional versions to install:"
+
     local INDEX=0
     for PLUGIN in "${INSTALLS[@]}"; do
 
@@ -197,7 +202,9 @@ process_wp_plugins() {
         else
             docker compose exec wordpress wp plugin install "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
         fi
+
         docker compose exec wordpress wp plugin activate "$PLUGIN" --path="/var/www/html" --url="http://127.0.01:$WORDPRESS_SITE_PORT" --allow-root
+
         ((INDEX++))
     done
 }
@@ -211,8 +218,9 @@ if [ -n "$WP_PLUGINS" ] && [[ "$AUTO_INSTALL" == true ]]; then
     process_wp_plugins "$WP_PLUGINS"
 fi
 
-printf "\nSetup completed."
-printf "\nWordPress site: $URL"
+echo ""
+echo "Setup completed."
+echo "WordPress site: $URL"
 echo "PhpMyAdmin: http://127.0.0.1:${PMA_PORT}"
 
 
