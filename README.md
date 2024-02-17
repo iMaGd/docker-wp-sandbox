@@ -12,10 +12,15 @@ Before beginning, make sure you have Docker installed on your local machine. You
 
    First, clone this repository to your local machine:
 
-   ```sh
+   ```bash
    git clone https://github.com/iMaGd/docker-wp-sandbox.git
    cd docker-wp-sandbox
+   ```
+   Or download the repo from [releases page](https://github.com/iMaGd/docker-wp-sandbox/releases)
 
+   Open the folder in terminal and run the following command
+
+   ```bash
    # Grant execution permission to script files
    sudo chmod +x start.sh stop.sh
    ```
