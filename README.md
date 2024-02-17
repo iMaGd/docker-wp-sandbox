@@ -100,7 +100,7 @@ Sets the WordPress admin username, password, and email address respectively. The
 To start a fresh WordPress site on port 8074 with PHP version 7.4:
 
 ```bash
-sh start.sh -p 8074 --php 7.4 -b --clean
+./start.sh -p 8074 --php 7.4 -b --clean
 ```
 
 ### Automatically Opening Site In Browser
@@ -108,7 +108,7 @@ sh start.sh -p 8074 --php 7.4 -b --clean
 To automatically open the WordPress installation after setup in your browser, add the `-o` flag:
 
 ```bash
-sh start.sh -p 8074 --php 7.4 -b --clean -o
+./start.sh -p 8074 --php 7.4 -b --clean -o
 ```
 
 ### Setting Up Plugins On Installation
@@ -116,7 +116,7 @@ sh start.sh -p 8074 --php 7.4 -b --clean -o
 To setup WordPress with specific plugins installed or removed by default:
 
 ```bash
-sh start.sh -p 8080 --php 8.0 --auto-install --wp-plugins "+woocommerce,+classic-editor,-hello" -o
+./start.sh -p 8080 --php 8.0 --auto-install --wp-plugins "+woocommerce,+classic-editor,-hello" -o
 ```
 
 ## Stopping the WordPress Site
@@ -124,7 +124,7 @@ sh start.sh -p 8080 --php 8.0 --auto-install --wp-plugins "+woocommerce,+classic
 To stop the WordPress site and optionally clean up all associated Docker volumes for a specific port, you can use the `stop.sh` script. For example, to stop the site running on port 8082 and remove its volumes:
 
 ```bash
-sh stop.sh -p 8082 -c
+./stop.sh -p 8082 -c
 ```
 
 ## Additional Notes
