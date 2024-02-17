@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  db:
+    container_name: ${COMPOSE_PROJECT_NAME}_db
+    image: ${DB_ENGINE:-mysql}:${DB_VERSION:-latest}
+    ports:
+      - ${DB_PORT:-3082}:3306
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD:-root}
+      MYSQL_USER: ${DATABASE_USER:-wordpress}
+      MYSQL_DATABASE: ${COMPOSE_PROJECT_NAME:-wordpress}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD:-wordpress}
+    volumes:
+      - ${DB_DATA_DIR:-./.stage/volumes/base/db}:/var/lib/mysql
+
+  wordpress:
+    container_name: ${COMPOSE_PROJECT_NAME}_wp
+    image: ${WORDPRESS_IMAGE:-wordpress:6-php8.1-apache}
+    restart: always
+    ports:
+      - ${WORDPRESS_SITE_PORT:-8082}:80
+    volumes:
+      - ${WORDPRESS_DATA_DIR}:/var/www/html/wp-content/
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DATABASE_USER:-wordpress}
+      WORDPRESS_DB_NAME: ${COMPOSE_PROJECT_NAME:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DATABASE_PASSWORD:-wordpress}
+      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-true}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_DEBUG_DISPLAY', true);
+        define('WP_DEBUG_LOG', true);
+    depends_on:
+      - db
+    links:
+      - db
+
+  phpmyadmin:
+    container_name: ${COMPOSE_PROJECT_NAME}_pma
+    image: phpmyadmin:5-apache
+    restart: always
+    ports:
+      - ${PMA_PORT:-4082}:80
+    environment:
+      PMA_HOST: ${PMA_HOST:-db}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD:-root}
+    depends_on:
+      - db
