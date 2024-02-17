@@ -101,7 +101,7 @@ echo "local volume is $LOCAL_VOLUME"
 
 # If REBUILD or FRESH_INSTALL was enabled
 if [[ "$REBUILD" == true ]] || [[ "$CLEAN_INSTALL" == true ]]; then
-    echo "\nStopping containers .. \n"
+    printf "\nStopping containers .. \n"
     # call the override docker compose file if $LOCAL_VOLUME is set
     if [ -z "$LOCAL_VOLUME" ]; then
         docker compose --env-file .docker/.env -f .docker/docker-compose.yml down
