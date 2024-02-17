@@ -49,47 +49,47 @@ Before beginning, make sure you have Docker installed on your local machine. You
 
 The `start.sh` script is the heart of this setup, offering a variety of options to customize your WordPress Docker environment. Here's an explanation of each available option:
 
-### `-p, --port`
+#### `-p, --port`
 
 The local port on which the WordPress site will be available. Example: `-p 8082` would make your WordPress site accessible at `http://localhost:8082`.
 
-### `--php`
+#### `--php`
 
 Defines the PHP version for your WordPress Docker container. Example: `--php 7.4` will setup a WordPress environment with PHP 7.4.
 
-### `-v, --volume`
+#### `-v, --volume`
 
 Mounts a local volume to the Docker container. This is particularly useful for plugin or theme development. For example, `-v "./my-plugin/:/var/www/html/wp-content/plugins/my-plugin"` mounts a local directory to the plugins directory of WordPress.
 
-### `-w, --wp-image`
+#### `-w, --wp-image`
 
 Specifies the WordPress Docker image tag. This is used if you want to specify a particular WordPress version. For instance, `-w 5.7.2-php7.4-apache` sets up WordPress version 5.7.2 with PHP 7.4.
 
-### `-b, --rebuild`
+#### `-b, --rebuild`
 
 Rebuilds the Docker containers if they already exist. This is useful when you've made configuration changes and need to apply them.
 
-### `-c, --clean`
+#### `-c, --clean`
 
 Indicates a clean installation by wiping the existing Docker volumes associated with the selected port before setting it up again.
 
-### `-o, --auto-open`
+#### `-o, --auto-open`
 
 Automatically opens the WordPress setup in your default browser when ready.
 
-### `--auto-install`
+#### `--auto-install`
 
 Automatically installs WordPress after spinning up the Docker containers, using the details provided for admin username, password, and email.
 
-### `--wp-cli`
+#### `--wp-cli`
 
 Installs WP-CLI within the WordPress Docker container. This is useful for running WordPress commands directly in the Docker environment.
 
-### `--wp-plugins`
+#### `--wp-plugins`
 
 Specifies plugins to install or uninstall. Prepend the plugin slug with `+` to install, `-` to uninstall. You can also specify a version for installing by appending `@<version>` to the slug. For example, `--wp-plugins "-hello,+depicter@2.1.0"` would uninstall the "hello" plugin and install "depicter" at version 2.1.0.
 
-### `--wp-user`, `--wp-pass`, `--wp-email`
+#### `--wp-user`, `--wp-pass`, `--wp-email`
 
 Sets the WordPress admin username, password, and email address respectively. These are needed primarily for the `--auto-install` option.
 
