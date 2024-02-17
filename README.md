@@ -25,7 +25,7 @@ Before beginning, make sure you have Docker installed on your local machine. You
    By running `start.sh` in following command, it will create a WordPress environment with PHP 8.1, installs WordPress core, removes the "hello" plugin, installs the "depicter" plugin at version 2.1.0, and then open the site in your browser on port 8081.
 
    ```sh
-   ./start.sh -p 8081 --php 8.1 -b --auto-install --wp-plugins "-hello,+depicter@2.1.0" -o
+   ./start.sh -p 8081 --php 8.1 --auto-install --wp-plugins "-hello,+depicter@2.1.0" -b -o
    ```
 
    This script comes with various options to customize your WordPress setup:
@@ -116,15 +116,32 @@ To automatically open the WordPress installation after setup in your browser, ad
 To setup WordPress with specific plugins installed or removed by default:
 
 ```bash
-./start.sh -p 8080 --php 8.0 --auto-install --wp-plugins "+woocommerce,+classic-editor,-hello" -o
+./start.sh -p 8080 --php 8.0 --auto-install --wp-plugins "-hello,-akismet,+depicter" -o
 ```
 
-## Stopping the WordPress Site
+## Stopping A Site
 
-To stop the WordPress site and optionally clean up all associated Docker volumes for a specific port, you can use the `stop.sh` script. For example, to stop the site running on port 8082 and remove its volumes:
+To stop the WordPress site you can use the `stop.sh` script. For example, to stop the site running on port 8082 and remove its volumes:
+
+```bash
+./stop.sh -p 8082
+```
+
+## Stopping and REMOVING A Site
+
+To stop and DELETE all associated Docker volumes for a specific port:
 
 ```bash
 ./stop.sh -p 8082 -c
+```
+The `-c` option triggers a volume clean up for the WordPress site.
+
+## Fetching Repo Updates
+
+In order to get the latest changes from this repo, run the following command in your cloned directory:
+
+```bash
+sudo chmod -x start.sh stop.sh && git pull origin && git sudo chmod +x start.sh stop.sh
 ```
 
 ## Additional Notes
